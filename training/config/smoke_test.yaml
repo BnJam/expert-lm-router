@@ -1,0 +1,18 @@
+model: ./models/gemma-3-1b-it
+train: true
+data: ./training/data/seed
+fine_tune_type: lora
+lora_parameters:
+  rank: 4
+  dropout: 0.0
+  scale: 10.0
+num_layers: 4
+batch_size: 1
+iters: 100
+learning_rate: 1e-4
+grad_checkpoint: false
+seed: 42
+adapter_path: ./training/adapters/smoke-test
+steps_per_report: 10
+steps_per_eval: 50
+val_batches: -1

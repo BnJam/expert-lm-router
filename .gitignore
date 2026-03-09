@@ -1,0 +1,48 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Go build outputs
+/router
+/trainer
+
+# Code coverage
+*.out
+coverage.*
+*.coverprofile
+profile.cov
+
+# Go workspace
+go.work
+go.work.sum
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Training artefacts (large / generated — re-download or regenerate as needed)
+training/data/synthetic/
+training/data/filtered/
+training/adapters/
+training/fused/
+training/gguf/
+training/runs/
+training/baselines/
+
+# Models (large binaries — see models/README.md for download instructions)
+models/
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# OS
+.DS_Store

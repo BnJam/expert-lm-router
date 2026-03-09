@@ -1,0 +1,20 @@
+[project]
+name = "expert-lm-router"
+version = "0.1.0"
+description = "GA-routed mixture of domain-expert LLMs, trained with mlx-lm on Apple M1"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mlx-lm",
+    "huggingface-hub",
+    "datasets",
+    "anthropic",
+    "psutil",
+    "structlog",
+    "datasketch",
+    "torch>=2.10.0",
+    "gguf>=0.18.0",
+]
+
+[tool.setuptools.packages.find]
+exclude = ["models*", "training*", "config*", "docs*", "cmd*", "internal*"]
