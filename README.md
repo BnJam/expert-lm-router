@@ -10,7 +10,7 @@ deterministic quality signals (`go build`, `go vet`) and user feedback.
 | Phase | Description | Status |
 |-------|-------------|--------|
 | 1 | Toolchain validation | Complete |
-| 2 | Data pipeline | In progress |
+| 2 | Data pipeline | Complete |
 | 3 | Expert training | Pending |
 | 4 | Ollama router service | Pending |
 | 5 | GA router | Pending |
