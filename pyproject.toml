@@ -12,6 +12,8 @@ dependencies = [
     "psutil",
     "structlog",
     "datasketch",
+    "tree-sitter>=0.23.0",
+    "tree-sitter-go>=0.23.0",
     "torch>=2.10.0",
     "gguf>=0.18.0",
 ]
