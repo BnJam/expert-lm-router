@@ -237,7 +237,40 @@ def call_api(chunk: str, n: int, model: str, ollama_url: str) -> list[dict]:
 
 # ── Corpus iteration ───────────────────────────────────────────────────────────
 
-def iter_chunks(corpus_dir: Path, max_chars: int, seed: int) -> list[tuple[str, str, int]]:
+def _apply_oversample(
+    chunks: list[tuple[str, str, int]],
+    weights: dict[str, int],
+    seed: int,
+) -> list[tuple[str, str, int]]:
+    """
+    Duplicate chunks whose path contains a weighted prefix, then re-shuffle.
+    weights: e.g. {'gobyexample': 5, 'patterns': 3}
+    """
+    if not weights:
+        return chunks
+    result = []
+    for item in chunks:
+        multiplier = 1
+        for prefix, w in weights.items():
+            if prefix in item[0]:
+                multiplier = w
+                break
+        result.extend([item] * multiplier)
+    random.seed(seed + 1)
+    random.shuffle(result)
+    before = len(chunks)
+    after = len(result)
+    log.info('oversample_applied', before=before, after=after,
+             weights={k: v for k, v in weights.items()})
+    return result
+
+
+def iter_chunks(
+    corpus_dir: Path,
+    max_chars: int,
+    seed: int,
+    oversample: dict[str, int] | None = None,
+) -> list[tuple[str, str, int]]:
     """Collect all (filepath, chunk, idx) tuples from corpus, shuffled by file."""
     files = sorted(
         p for p in corpus_dir.rglob('*')
@@ -255,6 +288,9 @@ def iter_chunks(corpus_dir: Path, max_chars: int, seed: int) -> list[tuple[str, 
         chunker = chunk_declarations if path.suffix == '.go' else chunk_text
         for i, chunk in enumerate(chunker(text, max_chars)):
             result.append((str(path), chunk, i))
+
+    if oversample:
+        result = _apply_oversample(result, oversample, seed)
     return result
 
 
@@ -286,7 +322,16 @@ def main() -> None:
     ap.add_argument('--ollama-url',       default='http://localhost:11434')
     ap.add_argument('--delay',            type=float,     default=0.3)
     ap.add_argument('--seed',             type=int,       default=42)
+    ap.add_argument('--oversample',       default='',
+                    help='path-prefix:weight pairs, e.g. gobyexample:5,patterns:3')
     args = ap.parse_args()
+
+    oversample: dict[str, int] = {}
+    for part in args.oversample.split(','):
+        part = part.strip()
+        if ':' in part:
+            prefix, weight = part.rsplit(':', 1)
+            oversample[prefix.strip()] = int(weight)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     state_path = args.output.with_suffix('.state.json')
@@ -297,7 +342,7 @@ def main() -> None:
 
     log.info('starting', target=args.target, model=args.model,
              ollama_url=args.ollama_url, already_done=state['total'])
-    chunks = iter_chunks(args.corpus_dir, max_chars, args.seed)
+    chunks = iter_chunks(args.corpus_dir, max_chars, args.seed, oversample or None)
     log.info('corpus_loaded', total_chunks=len(chunks))
 
     with args.output.open('a') as out_f:
