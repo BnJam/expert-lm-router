@@ -1,0 +1,27 @@
+model: ./models/gemma-3-1b-it
+train: true
+data: ./training/data/filtered
+fine_tune_type: lora
+
+lora_parameters:
+  rank: 8
+  dropout: 0.05
+  scale: 20.0
+
+# Fine-tune the top 16 of 18 transformer layers for good coverage
+# while keeping early embedding layers frozen.
+num_layers: 16
+
+batch_size: 2
+grad_checkpoint: true
+
+# 1,657 train pairs / batch_size 2 ≈ 829 steps/epoch → 3,000 iters ≈ 3.6 epochs
+iters: 3000
+learning_rate: 1e-4
+
+seed: 42
+adapter_path: ./training/adapters/go-expert-v1
+
+steps_per_report: 50
+steps_per_eval: 300
+val_batches: -1
